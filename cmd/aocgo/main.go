@@ -5,8 +5,13 @@ import (
 	"github.com/javierpoduje/aocgo/internal/solvers"
 )
 
+const (
+	fileOne = "./internal/text-files/1.txt"
+)
+
 func main() {
-	fmt.Println("from main")
-	fromSolve := solvers.Solve()
-	fmt.Printf("%s", fromSolve)
+	solver := solvers.GetSolverByNumber(1)
+	solver.Parse(fileOne)
+	firstProblemAnswer := solver.SolveFirstProblem()
+	fmt.Println(firstProblemAnswer)
 }
