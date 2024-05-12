@@ -1,7 +1,6 @@
 package solvers
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -61,10 +60,8 @@ func processRow(row []string, numbersTrie *ds.Trie) int {
 	left := 0
 	right := 0
 
-	fmt.Printf("Row: %v\n", row)
-
 	for {
-		if left >= len(row) || right >= len(row) {
+		if left >= len(row) || right > len(row) {
 			break
 		}
 
@@ -103,6 +100,10 @@ func processRow(row []string, numbersTrie *ds.Trie) int {
 				continue
 			}
 		} else {
+			if wordContainsNumber(row[left:right]) {
+				left = right
+				continue
+			}
 			numberAsWord := strings.Join(row[left:right], "")
 			if numbersTrie.Search(numberAsWord) {
 				if leftNum == "" {
@@ -111,7 +112,6 @@ func processRow(row []string, numbersTrie *ds.Trie) int {
 				} else {
 					rightNum = numberAsWordToChar(numberAsWord)
 				}
-				right++
 				left = right
 				continue
 			} else if numbersTrie.StartsWith(strings.Join(row[left:right], "")) {
@@ -126,8 +126,6 @@ func processRow(row []string, numbersTrie *ds.Trie) int {
 	}
 
 	number := joinAndParse([]string{leftNum, rightNum})
-
-	fmt.Printf("number: %v\n", number)
 
 	return number
 }
@@ -211,4 +209,13 @@ func numberAsWordToChar(word string) string {
 	default:
 		return ""
 	}
+}
+
+func wordContainsNumber(word []string) bool {
+	for _, char := range word {
+		if charIsNumber(char) {
+			return true
+		}
+	}
+	return false
 }
