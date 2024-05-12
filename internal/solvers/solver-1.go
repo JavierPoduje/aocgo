@@ -74,8 +74,16 @@ func processRow(row []string, numbersTrie *ds.Trie) int {
 				} else {
 					rightNum = numberAsWordToChar(numberAsWord)
 				}
+			} else if len(numberAsWord) == 1 && charIsNumber(numberAsWord) {
+				if leftNum == "" {
+					leftNum = numberAsWord
+					rightNum = numberAsWord
+				} else {
+					rightNum = numberAsWord
+				}
 			}
-			break
+			left++
+			continue
 		}
 
 		if left == right {
@@ -101,6 +109,7 @@ func processRow(row []string, numbersTrie *ds.Trie) int {
 			}
 		} else {
 			if wordContainsNumber(row[left:right]) {
+				right = right - 1
 				left = right
 				continue
 			}

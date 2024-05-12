@@ -65,4 +65,12 @@ func Test_processRow(t *testing.T) {
 	if rowNum != 76 {
 		t.Errorf("Expected 76, got %d", rowNum)
 	}
+	rowNum = processRow([]string{"j", "j", "n", "1", "d", "r", "d", "f", "f", "h", "s"}, numbersTrie)
+	if rowNum != 11 {
+		t.Errorf("Expected 11, got %d", rowNum)
+	}
+	rowNum = processRow([]string{"f", "v", "q", "z", "l", "c", "p", "5"}, numbersTrie)
+	if rowNum != 55 {
+		t.Errorf("Expected 55, got %d", rowNum)
+	}
 }
