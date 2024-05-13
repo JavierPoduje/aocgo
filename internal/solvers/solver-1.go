@@ -5,8 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	ds "github.com/javierpoduje/aocgo/internal/data-structures"
 )
 
 type SolverOne struct {
@@ -42,96 +40,36 @@ func (s *SolverOne) SolveFirstProblem() int {
 }
 
 func (s *SolverOne) SolveSecondProblem() int {
-	numbersTrie := CreateNumbersTrie()
 	numberRows := make([]int, 0)
 
 	for _, row := range s.content {
-		number := processRow(row, numbersTrie)
+		number := processRow(row)
 		numberRows = append(numberRows, number)
 	}
 
 	return sumSliceOfNumbers(numberRows)
 }
 
-func processRow(row []string, numbersTrie *ds.Trie) int {
+func processRow(row []string) int {
 	leftNum := ""
 	rightNum := ""
 
-	left := 0
-	right := 0
+	for i := 0; i < len(row); i++ {
+		char := row[i]
+		word := strings.Join(row[i:], "")
 
-	for {
-		if left >= len(row) || right > len(row) {
-			break
+		if charIsNumber(char) {
+			if leftNum == "" {
+				leftNum = char
+			}
+			rightNum = char
+		} else if has, numberPrefix := wordStartsWithNumber(word); has {
+			if leftNum == "" {
+				leftNum = numberPrefix
+			}
+			rightNum = numberPrefix
 		}
 
-		if right == len(row) && left < right {
-			numberAsWord := strings.Join(row[left:right], "")
-			if numbersTrie.Search(numberAsWord) {
-				if leftNum == "" {
-					leftNum = numberAsWordToChar(numberAsWord)
-					rightNum = numberAsWordToChar(numberAsWord)
-				} else {
-					rightNum = numberAsWordToChar(numberAsWord)
-				}
-			} else if len(numberAsWord) == 1 && charIsNumber(numberAsWord) {
-				if leftNum == "" {
-					leftNum = numberAsWord
-					rightNum = numberAsWord
-				} else {
-					rightNum = numberAsWord
-				}
-			}
-			left++
-			continue
-		}
-
-		if left == right {
-			char := row[left]
-
-			if charIsNumber(char) {
-				if leftNum == "" {
-					leftNum = char
-					rightNum = char
-				} else {
-					rightNum = char
-				}
-				left++
-				right++
-				continue
-			} else if numbersTrie.StartsWith(char) {
-				right++
-				continue
-			} else {
-				left++
-				right++
-				continue
-			}
-		} else {
-			if wordContainsNumber(row[left:right]) {
-				right = right - 1
-				left = right
-				continue
-			}
-			numberAsWord := strings.Join(row[left:right], "")
-			if numbersTrie.Search(numberAsWord) {
-				if leftNum == "" {
-					leftNum = numberAsWordToChar(numberAsWord)
-					rightNum = numberAsWordToChar(numberAsWord)
-				} else {
-					rightNum = numberAsWordToChar(numberAsWord)
-				}
-				left = right
-				continue
-			} else if numbersTrie.StartsWith(strings.Join(row[left:right], "")) {
-				right++
-				continue
-			} else {
-				left++
-				right++
-				continue
-			}
-		}
 	}
 
 	number := joinAndParse([]string{leftNum, rightNum})
@@ -179,52 +117,26 @@ func sumSliceOfNumbers(numbers []int) int {
 	return sum
 }
 
-func CreateNumbersTrie() *ds.Trie {
-	trie := ds.NewTrie()
-	trie.InsertMany([]string{
-		"one",
-		"two",
-		"three",
-		"four",
-		"five",
-		"six",
-		"seven",
-		"eight",
-		"nine",
-	})
-	return trie
-}
-
-func numberAsWordToChar(word string) string {
-	switch word {
-	case "one":
-		return "1"
-	case "two":
-		return "2"
-	case "three":
-		return "3"
-	case "four":
-		return "4"
-	case "five":
-		return "5"
-	case "six":
-		return "6"
-	case "seven":
-		return "7"
-	case "eight":
-		return "8"
-	case "nine":
-		return "9"
-	default:
-		return ""
+func wordStartsWithNumber(word string) (bool, string) {
+	if strings.HasPrefix(word, "one") {
+		return true, "1"
+	} else if strings.HasPrefix(word, "two") {
+		return true, "2"
+	} else if strings.HasPrefix(word, "three") {
+		return true, "3"
+	} else if strings.HasPrefix(word, "four") {
+		return true, "4"
+	} else if strings.HasPrefix(word, "five") {
+		return true, "5"
+	} else if strings.HasPrefix(word, "six") {
+		return true, "6"
+	} else if strings.HasPrefix(word, "seven") {
+		return true, "7"
+	} else if strings.HasPrefix(word, "eight") {
+		return true, "8"
+	} else if strings.HasPrefix(word, "nine") {
+		return true, "9"
 	}
-}
 
-func wordContainsNumber(word []string) bool {
-	for _, char := range word {
-		if charIsNumber(char) {
-			return true
-		}
-	}
-	return false
+	return false, ""
 }
