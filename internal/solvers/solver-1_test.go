@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func Test_SolveFirstProblem(t *testing.T) {
+func TestSolverOne_SolveFirstProblem(t *testing.T) {
 	solver := &SolverOne{}
 	solver.content = [][]string{
 		{"1", "a", "b", "c", "2"},
@@ -18,7 +18,7 @@ func Test_SolveFirstProblem(t *testing.T) {
 	}
 }
 
-func Test_SolveSecondProblem(t *testing.T) {
+func TestSolverOne_SolveSecondProblem(t *testing.T) {
 	solver := &SolverOne{}
 	solver.content = [][]string{
 		{"t", "w", "o", "1", "n", "i", "n", "e"},
@@ -35,7 +35,7 @@ func Test_SolveSecondProblem(t *testing.T) {
 	}
 }
 
-func Test_processRow(t *testing.T) {
+func TestSolverOne_processRow(t *testing.T) {
 	rowNum := processRow([]string{"t", "w", "o", "1", "n", "i", "n", "e"})
 	if rowNum != 29 {
 		t.Errorf("Expected 29, got %d", rowNum)

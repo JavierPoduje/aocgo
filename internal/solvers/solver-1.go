@@ -43,8 +43,7 @@ func (s *SolverOne) SolveSecondProblem() int {
 	numberRows := make([]int, 0)
 
 	for _, row := range s.content {
-		number := processRow(row)
-		numberRows = append(numberRows, number)
+		numberRows = append(numberRows, processRow(row))
 	}
 
 	return sumSliceOfNumbers(numberRows)

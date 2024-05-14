@@ -1,19 +1,21 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+
 	"github.com/javierpoduje/aocgo/internal/solvers"
 )
 
-const (
-	fileOne = "./internal/text-files/1.txt"
-)
-
 func main() {
-	solver := solvers.GetSolverByNumber(1)
+	solverArg := flag.Int("solver", 1, "The solver number")
+	flag.Parse()
 
-	solver.Parse(fileOne)
+	solverNumber := *solverArg
 
+	solver, filename := solvers.GetSolverByNumber(solverNumber)
+
+	solver.Parse(filename)
 	fstProblemAnswer := solver.SolveFirstProblem()
 	scdProblemAnswer := solver.SolveSecondProblem()
 
