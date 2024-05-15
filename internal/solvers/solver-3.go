@@ -40,7 +40,19 @@ func (s *SolverThree) SolveFirstProblem() int {
 }
 
 func (s *SolverThree) SolveSecondProblem() int {
-	return 0
+	gears := findGears(s.content)
+	gearRatios := make([]int, 0)
+	gearRatioSum := 0
+
+	for _, gear := range gears {
+		gearRatios = append(gearRatios, gear[0]*gear[1])
+	}
+
+	for _, gearRatio := range gearRatios {
+		gearRatioSum += gearRatio
+	}
+
+	return gearRatioSum
 }
 
 func findNumberParts(content [][]string) []int {
@@ -63,6 +75,51 @@ func findNumberParts(content [][]string) []int {
 	}
 
 	return numberParts
+}
+
+func findGears(content [][]string) [][]int {
+	gears := make([][]int, 0)
+	usedIdxs := map[string]bool{}
+
+	for rowIdx, row := range content {
+		for colIdx, char := range row {
+			if charIsGearSymbol(char) {
+				adjacentNumbers, resUsedIdx := getAdjacentNumbers(content, rowIdx, colIdx, usedIdxs)
+				if len(adjacentNumbers) == 2 {
+					gears = append(gears, adjacentNumbers)
+					for idx := range resUsedIdx {
+						usedIdxs[idx] = true
+					}
+				}
+			}
+		}
+	}
+
+	return gears
+}
+
+func getAdjacentNumbers(content [][]string, rowIdx int, colIdx int, usedIdxs map[string]bool) ([]int, map[string]bool) {
+	dirs := getDirections()
+
+	adjacentNumbers := make([]int, 0)
+	localUsedIdxs := usedIdxs
+
+	for _, dir := range dirs {
+		row := rowIdx + dir[0]
+		col := colIdx + dir[1]
+
+		if inBounds(content, row, col) && charIsNumber(content[row][col]) && !isUsed(localUsedIdxs, row, col) {
+			numberPart, numberPartIdxs := buildNumberPart(content, row, col)
+			adjacentNumbers = append(adjacentNumbers, numberPart)
+			for _, idx := range numberPartIdxs {
+				row := idx[0]
+				col := idx[1]
+				localUsedIdxs[idxKey(row, col)] = true
+			}
+		}
+	}
+
+	return adjacentNumbers, localUsedIdxs
 }
 
 func isUsed(usedIdxs map[string]bool, rowIdx int, colIdx int) bool {
@@ -145,4 +202,8 @@ func getDirections() [][]int {
 
 func idxKey(row int, col int) string {
 	return strings.Join([]string{strconv.Itoa(row), strconv.Itoa(col)}, "-")
+}
+
+func charIsGearSymbol(char string) bool {
+	return char == "*"
 }

@@ -23,3 +23,23 @@ func TestSolverThree_SolveFirstProblem(t *testing.T) {
 		t.Errorf("Expected 4361, got %d", firstProblemAns)
 	}
 }
+
+func TestSolverThree_SolveSecondProblem(t *testing.T) {
+	solver := &SolverThree{}
+	solver.content = [][]string{
+		{"4", "6", "7", ".", ".", "1", "1", "4", ".", "."},
+		{".", ".", ".", "*", ".", ".", ".", ".", ".", "."},
+		{".", ".", "3", "5", ".", ".", "6", "3", "3", "."},
+		{".", ".", ".", ".", ".", ".", "#", ".", ".", "."},
+		{"6", "1", "7", "*", ".", ".", ".", ".", ".", "."},
+		{".", ".", ".", ".", ".", "+", ".", "5", "8", "."},
+		{".", ".", "5", "9", "2", ".", ".", ".", ".", "."},
+		{".", ".", ".", ".", ".", ".", "7", "5", "5", "."},
+		{".", ".", ".", "$", ".", "*", ".", ".", ".", "."},
+		{".", "6", "6", "4", ".", "5", "9", "8", ".", "."},
+	}
+	secondProblemAns := solver.SolveSecondProblem()
+	if secondProblemAns != 467835 {
+		t.Errorf("Expected 467835, got %d", secondProblemAns)
+	}
+}
