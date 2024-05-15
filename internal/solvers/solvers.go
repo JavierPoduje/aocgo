@@ -1,13 +1,16 @@
 package solvers
 
 import (
+	"log"
+
 	"github.com/javierpoduje/aocgo/internal/types"
 )
 
 func GetSolverByNumber(solverNumber int) (solver types.Solver, filename string) {
 	const (
-		fileOne = "./internal/text-files/1.txt"
-		fileTwo = "./internal/text-files/2.txt"
+		fileOne   = "./internal/text-files/1.txt"
+		fileTwo   = "./internal/text-files/2.txt"
+		fileThree = "./internal/text-files/3.txt"
 	)
 
 	switch solverNumber {
@@ -15,7 +18,11 @@ func GetSolverByNumber(solverNumber int) (solver types.Solver, filename string) 
 		return &SolverOne{}, fileOne
 	case 2:
 		return &SolverTwo{}, fileTwo
+	case 3:
+		return &SolverThree{}, fileThree
 	default:
-		return &SolverOne{}, fileOne
+		log.Fatal("Invalid solver number")
 	}
+
+	return nil, ""
 }
