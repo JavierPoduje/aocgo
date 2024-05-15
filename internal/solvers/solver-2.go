@@ -41,15 +41,7 @@ func (s *SolverTwo) Parse(file string) {
 }
 
 func (s *SolverTwo) SolveFirstProblem() int {
-	records := make([]Record, len(s.content))
-	for _, row := range s.content {
-		id, err := strconv.Atoi(gameId(row))
-		if err != nil {
-			log.Fatal(err)
-		}
-		games := gamesFromRow(row)
-		records = append(records, Record{id: id, games: games})
-	}
+	records := parseRecords(s.content)
 
 	filteredRecords := make([]Record, 0)
 	for _, record := range records {
@@ -67,7 +59,55 @@ func (s *SolverTwo) SolveFirstProblem() int {
 }
 
 func (s *SolverTwo) SolveSecondProblem() int {
-	return 0
+	records := parseRecords(s.content)
+	games := make([]Game, len(records))
+	for _, record := range records {
+		smallesGamePossible := reduceRecord(record)
+		games = append(games, smallesGamePossible)
+	}
+
+	powerSum := 0
+	for _, game := range games {
+		cube := game.blue * game.green * game.red
+		powerSum += cube
+	}
+
+	return powerSum
+}
+
+func reduceRecord(record Record) Game {
+	red := 0
+	blue := 0
+	green := 0
+	for _, game := range record.games {
+		if game.red > red {
+			red = game.red
+		}
+		if game.blue > blue {
+			blue = game.blue
+		}
+		if game.green > green {
+			green = game.green
+		}
+	}
+	return Game{
+		blue:  blue,
+		green: green,
+		red:   red,
+	}
+}
+
+func parseRecords(content []string) []Record {
+	records := make([]Record, 0)
+	for _, row := range content {
+		id, err := strconv.Atoi(gameId(row))
+		if err != nil {
+			log.Fatal(err)
+		}
+		games := gamesFromRow(row)
+		records = append(records, Record{id: id, games: games})
+	}
+	return records
 }
 
 func isValidRecord(record Record) bool {
