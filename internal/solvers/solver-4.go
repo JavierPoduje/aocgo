@@ -70,7 +70,33 @@ func (s *SolverFour) SolveFirstProblem() int {
 }
 
 func (s *SolverFour) SolveSecondProblem() int {
-	return 0
+	scratchcards := parseScratchcards(s.content)
+	duplicatedCards := make([]int, len(scratchcards))
+	for idx := range duplicatedCards {
+		duplicatedCards[idx] = 1
+	}
+
+	for idx, scratchcard := range scratchcards {
+		numberOfWins := scratchcard.CalculateNumberOfWins()
+		if numberOfWins == 0 {
+			continue
+		}
+
+		duplicationsOfCurrentCard := duplicatedCards[idx]
+
+		pivot := idx + 1
+		for numberOfWins > 0 && pivot < len(duplicatedCards) {
+			duplicatedCards[pivot] += duplicationsOfCurrentCard
+			pivot++
+			numberOfWins--
+		}
+	}
+
+	cardsSum := 0
+	for _, numberOfCards := range duplicatedCards {
+		cardsSum += numberOfCards
+	}
+	return cardsSum
 }
 
 func parseScratchcards(content []string) []Scratchcard {
