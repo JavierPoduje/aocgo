@@ -8,10 +8,16 @@ import (
 	"strings"
 )
 
+type FromToRange struct {
+	from int
+	size int
+	to   int
+}
+
 type Node struct {
 	source      string
 	destination string
-	maps        map[int]int
+	ranges      []FromToRange
 }
 
 type SolverFive struct {
@@ -41,12 +47,20 @@ func (s *SolverFive) Parse(file string) {
 func (s *SolverFive) SolveFirstProblem() int {
 	s.buildNodes()
 
-	var location int
+	locations := make([]int, 0)
 	for _, seed := range s.seeds {
-		location = getLocationBySeed(seed, s.nodes)
+		location := getLocationBySeed(seed, s.nodes)
+		locations = append(locations, location)
 	}
 
-	return location
+	var closestLocation int
+	for _, location := range locations {
+		if closestLocation == 0 || location < closestLocation {
+			closestLocation = location
+		}
+	}
+
+	return closestLocation
 }
 
 func (s *SolverFive) SolveSecondProblem() int {
@@ -71,15 +85,31 @@ func getLocationBySeed(seed int, nodes []Node) int {
 		destination := sourceDestination[1]
 
 		node := getBySourceAndDestination(source, destination, nodes)
-		mappedValue = node.maps[valueToMapFrom]
-		if mappedValue == 0 {
-			mappedValue = valueToMapFrom
+		for _, fromToRange := range node.ranges {
+			localMappedValue, found := fromToRange.Get(valueToMapFrom)
+
+			mappedValue = localMappedValue
+
+			if found {
+				break
+			}
 		}
 
 		valueToMapFrom = mappedValue
 	}
 
 	return mappedValue
+}
+
+func (f FromToRange) Get(valueToMapFrom int) (int, bool) {
+	valueInRange := f.from <= valueToMapFrom && valueToMapFrom <= f.from+f.size
+	if !valueInRange {
+		return valueToMapFrom, false
+	}
+
+	offset := valueToMapFrom - f.from
+
+	return f.to + offset, true
 }
 
 func (s *SolverFive) buildNodes() {
@@ -92,12 +122,16 @@ func (s *SolverFive) buildNodes() {
 			nodes = append(nodes, Node{
 				source:      source,
 				destination: destination,
-				maps:        make(map[int]int),
+				ranges:      make([]FromToRange, 0),
 			})
 		} else if row != "" {
-			sourceDestinationMap := buildMapRow(row)
-			mergedMaps := mergeSourceDestinationMaps(nodes[len(nodes)-1].maps, sourceDestinationMap)
-			nodes[len(nodes)-1].maps = mergedMaps
+			from, to, size := buildMapRow(row)
+			lastNodeIdx := len(nodes) - 1
+			nodes[lastNodeIdx].ranges = append(nodes[lastNodeIdx].ranges, FromToRange{
+				from: from,
+				to:   to,
+				size: size,
+			})
 		}
 	}
 
@@ -138,41 +172,28 @@ func isHeaderRow(row string) bool {
 	return strings.Contains(row, "map:")
 }
 
-func buildMapRow(row string) map[int]int {
-	mappedValues := make(map[int]int)
-
+func buildMapRow(row string) (int, int, int) {
 	splittedRow := strings.Split(row, " ")
-	destinatioNumber, err := strconv.Atoi(splittedRow[0])
+
+	to, err := strconv.Atoi(splittedRow[0])
 	if err != nil {
 		fmt.Println("Error converting destination number to int")
 		log.Fatal(err)
 	}
-	sourceNumber, err := strconv.Atoi(splittedRow[1])
+
+	from, err := strconv.Atoi(splittedRow[1])
 	if err != nil {
 		fmt.Println("Error converting source number to int")
 		log.Fatal(err)
 	}
-	mapRange, err := strconv.Atoi(splittedRow[2])
+
+	size, err := strconv.Atoi(splittedRow[2])
 	if err != nil {
 		fmt.Println("Error converting map range to int")
 		log.Fatal(err)
 	}
 
-	for i := 0; i < mapRange; i++ {
-		mappedValues[sourceNumber] = destinatioNumber
-		sourceNumber++
-		destinatioNumber++
-	}
-
-	return mappedValues
-}
-
-func mergeSourceDestinationMaps(map1 map[int]int, map2 map[int]int) map[int]int {
-	for key, value := range map2 {
-		map1[key] = value
-	}
-
-	return map1
+	return from, to, size
 }
 
 func getBySourceAndDestination(source string, destination string, nodes []Node) Node {

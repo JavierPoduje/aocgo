@@ -46,3 +46,56 @@ func TestSolverFive_SolveFirstProblem(t *testing.T) {
 		t.Errorf("Expected 35, got %d", firstProblemAns)
 	}
 }
+
+func TestFromToRange_Get(t *testing.T) {
+	fromToRange := FromToRange{from: 10, to: 20, size: 5}
+
+	mappedValue, found := fromToRange.Get(12)
+	if mappedValue != 22 {
+		t.Errorf("Expected 22, got %d", mappedValue)
+	}
+	if !found {
+		t.Errorf("expected found, got %v", found)
+	}
+
+	mappedValue, found = fromToRange.Get(9)
+	if mappedValue != 9 {
+		t.Errorf("Expected 9, got %d", mappedValue)
+	}
+	if found {
+		t.Errorf("expected !found, got %v", found)
+	}
+
+	mappedValue, found = fromToRange.Get(22)
+	if mappedValue != 22 {
+		t.Errorf("Expected 22, got %d", mappedValue)
+	}
+	if !found {
+		t.Errorf("expected found, got %v", found)
+	}
+
+	mappedValue, found = fromToRange.Get(15)
+	if mappedValue != 25 {
+		t.Errorf("Expected 25, got %d", mappedValue)
+	}
+	if !found {
+		t.Errorf("expected found, got %v", found)
+	}
+
+	mappedValue, found = fromToRange.Get(20)
+	if mappedValue != 20 {
+		t.Errorf("Expected 20, got %d", mappedValue)
+	}
+	if found {
+		t.Errorf("expected !found, got %v", found)
+	}
+
+	fromToRange = FromToRange{from: 50, to: 52, size: 48}
+	mappedValue, found = fromToRange.Get(79)
+	if mappedValue != 81 {
+		t.Errorf("Expected 81, got %d", mappedValue)
+	}
+	if !found {
+		t.Errorf("expected found, got %v", found)
+	}
+}
