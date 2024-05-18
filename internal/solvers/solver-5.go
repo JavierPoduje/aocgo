@@ -64,7 +64,31 @@ func (s *SolverFive) SolveFirstProblem() int {
 }
 
 func (s *SolverFive) SolveSecondProblem() int {
-	return 0
+	s.buildNodes()
+
+	locations := make([]int, 0)
+
+	for idx := 0; idx+s.seeds[0] < s.seeds[0]+s.seeds[1]; idx++ {
+		seed := s.seeds[0] + idx
+		location := getLocationBySeed(seed, s.nodes)
+		locations = append(locations, location)
+	}
+
+	for idx := 0; idx+s.seeds[2] < s.seeds[2]+s.seeds[3]; idx++ {
+		seed := s.seeds[2] + idx
+		location := getLocationBySeed(seed, s.nodes)
+		locations = append(locations, location)
+	}
+
+	var closestLocation int
+	for _, location := range locations {
+		if closestLocation == 0 || location < closestLocation {
+			closestLocation = location
+		}
+	}
+
+	return closestLocation
+
 }
 
 func getLocationBySeed(seed int, nodes []Node) int {
