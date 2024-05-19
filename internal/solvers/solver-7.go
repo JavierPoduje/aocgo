@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -13,14 +14,36 @@ type SolverSeven struct {
 }
 
 const (
-	FiveOfAKind = iota + 1
-	FourOfAKind
-	FullHouse
-	ThreeOfAKind
-	TwoPair
+	HighCard = iota + 1
 	OnePair
-	HighCard
+	TwoPair
+	ThreeOfAKind
+	FullHouse
+	FourOfAKind
+	FiveOfAKind
 )
+
+func typeToString(t int) string {
+	switch t {
+	case HighCard:
+		return "HighCard"
+	case OnePair:
+		return "OnePair"
+	case TwoPair:
+		return "TwoPair"
+	case ThreeOfAKind:
+		return "ThreeOfAKind"
+	case FullHouse:
+		return "FullHouse"
+	case FourOfAKind:
+		return "FourOfAKind"
+	case FiveOfAKind:
+		return "FiveOfAKind"
+	default:
+		log.Fatal("Invalid type of hand")
+		return ""
+	}
+}
 
 type Hand struct {
 	Cards      []Card
@@ -28,40 +51,113 @@ type Hand struct {
 	typeOfHand int
 }
 
-func (h *Hand) New(cards []Card, bid int) Hand {
+type Hands []*Hand
+
+// implement sort.Interface
+func (h Hands) Len() int {
+	return len(h)
+}
+
+func (h Hand) String() string {
+	return fmt.Sprintf(
+		"\nHand{Cards: %v, bid: %d, typeOfHand: %s}",
+		h.Cards,
+		h.bid,
+		typeToString(h.typeOfHand),
+	)
+}
+
+func (h Hands) Less(i, j int) bool {
+	if h[i].Eq(h[j]) {
+		return false
+	}
+	return h[i].Less(h[j])
+}
+
+func (h Hands) Swap(i, j int) {
+	h[i], h[j] = h[j], h[i]
+}
+
+func (h *Hand) Less(other *Hand) bool {
+	if h.typeOfHand == other.typeOfHand {
+		return h.LessByStrength(other)
+	}
+	return h.typeOfHand < other.typeOfHand
+}
+
+func (h *Hand) LessByStrength(other *Hand) bool {
+	for idx, hCard := range h.Cards {
+		otherCard := other.Cards[idx]
+		if hCard.Strength() < otherCard.Strength() {
+			return true
+		} else if hCard.Strength() > otherCard.Strength() {
+			return false
+		}
+	}
+	return false
+}
+
+func (h *Hand) Eq(other *Hand) bool {
+	if h.typeOfHand == other.typeOfHand {
+		return h.EqByStrength(other)
+	}
+	return false
+}
+
+func (h *Hand) EqByStrength(other *Hand) bool {
+	for idx, hCard := range h.Cards {
+		otherCard := other.Cards[idx]
+		if hCard.Strength() != otherCard.Strength() {
+			return false
+		}
+	}
+	return true
+}
+
+func NewHand(cards []Card, bid int) Hand {
 	return Hand{
 		Cards:      cards,
 		bid:        bid,
-		typeOfHand: h.determineHandType(cards),
+		typeOfHand: DetermineHandType(cards),
 	}
 }
 
-func (h *Hand) determineHandType(cards []Card) int {
+func DetermineHandType(cards []Card) int {
 	typeOfHand := HighCard
 
 	mapOfCards := make(map[string]int)
-	pairWasFound := false
-	threeOfAKindWasFound := false
+
+	check := func(cards []Card, threshold int, exclusions map[string]bool) bool {
+		localMap := make(map[string]int)
+		for _, card := range cards {
+			if _, ok := exclusions[card.Value]; ok {
+				continue
+			}
+			localMap[card.Value] += 1
+			if localMap[card.Value] >= threshold {
+				return true
+			}
+		}
+		return false
+	}
 
 	for _, card := range cards {
 		mapOfCards[card.Value] += 1
+		currCardValue := card.Value
 
-		if mapOfCards[card.Value] == 5 && typeOfHand < FiveOfAKind {
+		if mapOfCards[currCardValue] == 5 && typeOfHand < FiveOfAKind {
 			typeOfHand = FiveOfAKind
-		} else if mapOfCards[card.Value] == 4 && typeOfHand < FourOfAKind {
+		} else if mapOfCards[currCardValue] == 4 && typeOfHand < FourOfAKind {
 			typeOfHand = FourOfAKind
-		} else if mapOfCards[card.Value] == 3 && pairWasFound && typeOfHand < FullHouse {
-			threeOfAKindWasFound = true
+		} else if mapOfCards[currCardValue] == 3 && typeOfHand < FullHouse && check(cards, 2, map[string]bool{currCardValue: true}) {
 			typeOfHand = FullHouse
-		} else if mapOfCards[card.Value] == 2 && threeOfAKindWasFound && typeOfHand < FullHouse {
+		} else if mapOfCards[currCardValue] == 2 && typeOfHand < FullHouse && check(cards, 3, map[string]bool{currCardValue: true}) {
 			typeOfHand = FullHouse
-		} else if mapOfCards[card.Value] == 3 && typeOfHand < ThreeOfAKind {
-			threeOfAKindWasFound = true
+		} else if mapOfCards[currCardValue] == 3 && typeOfHand < ThreeOfAKind {
 			typeOfHand = ThreeOfAKind
-		} else if mapOfCards[card.Value] == 2 && pairWasFound && typeOfHand < TwoPair {
+		} else if mapOfCards[currCardValue] == 2 && typeOfHand < TwoPair && check(cards, 2, map[string]bool{currCardValue: true}) {
 			typeOfHand = TwoPair
-		} else if mapOfCards[card.Value] == 2 && typeOfHand < OnePair {
-			pairWasFound = true
+		} else if mapOfCards[currCardValue] == 2 && typeOfHand < OnePair {
 			typeOfHand = OnePair
 		}
 	}
@@ -100,11 +196,47 @@ func (c *Card) Strength() int {
 }
 
 func (s *SolverSeven) SolveFirstProblem() int {
-	return 0
+	hands := buildHands(s.content)
+	sort.Sort(hands)
+
+	sumOfBiddMultipliedByIdx := 0
+	for idx, hand := range hands {
+		sumOfBiddMultipliedByIdx += hand.bid * (idx + 1)
+	}
+
+	return sumOfBiddMultipliedByIdx
 }
 
 func (s *SolverSeven) SolveSecondProblem() int {
 	return 0
+}
+
+func buildHands(content []string) Hands {
+	hands := make(Hands, 0)
+	for _, row := range content {
+		splittedRow := strings.Split(row, " ")
+		rawCards := splittedRow[0]
+		rawBid := splittedRow[1]
+
+		cards := stringToSliceOfCards(rawCards)
+		bid, err := strconv.Atoi(rawBid)
+		if err != nil {
+			fmt.Println("Error parsing bid")
+			log.Fatal(err)
+		}
+
+		hand := NewHand(cards, bid)
+		hands = append(hands, &hand)
+	}
+	return hands
+}
+
+func stringToSliceOfCards(rawCards string) []Card {
+	cards := make([]Card, 0)
+	for _, rawCard := range rawCards {
+		cards = append(cards, Card{Value: string(rawCard)})
+	}
+	return cards
 }
 
 func (s *SolverSeven) Parse(file string) {
