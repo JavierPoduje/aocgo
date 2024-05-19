@@ -19,6 +19,21 @@ func TestSolverSeven_SolveFirstProblem(t *testing.T) {
 	}
 }
 
+func TestSolverSeven_SolveSecondProblem(t *testing.T) {
+	solver := &SolverSeven{}
+	solver.content = []string{
+		"32T3K 765",
+		"T55J5 684",
+		"KK677 28",
+		"KTJJT 220",
+		"QQQJA 483",
+	}
+	ans := solver.SolveSecondProblem()
+	if ans != 5905 {
+		t.Errorf("Expected 5905, got %d", ans)
+	}
+}
+
 func TestSolverSeven_rawCardsToCards(t *testing.T) {
 	rawCards := "32T3K"
 	cards := stringToSliceOfCards(rawCards)
@@ -42,58 +57,81 @@ func TestSolverSeven_rawCardsToCards(t *testing.T) {
 	}
 }
 
+func TestSolverSeven_DetermineHandTypeWithJokers(t *testing.T) {
+	cards := stringToSliceOfCards("T55J5")
+	handType := DetermineHandTypeWithJokers(cards)
+	stringifiedType := typeToString(handType)
+	if stringifiedType != "FourOfAKind" {
+		t.Errorf("Expected FourOfAKind, got %s", stringifiedType)
+	}
+
+	cards = stringToSliceOfCards("A23J5")
+	handType = DetermineHandTypeWithJokers(cards)
+	stringifiedType = typeToString(handType)
+	if stringifiedType != "OnePair" {
+		t.Errorf("Expected OnePair, got %s", stringifiedType)
+	}
+
+	cards = stringToSliceOfCards("AJ3J5")
+	handType = DetermineHandTypeWithJokers(cards)
+	stringifiedType = typeToString(handType)
+	if stringifiedType != "ThreeOfAKind" {
+		t.Errorf("Expected ThreeOfAKind, got %s", stringifiedType)
+	}
+}
+
 func TestSolverSeven_DetermineHandType(t *testing.T) {
 	cards := stringToSliceOfCards("77777")
-	handType := DetermineHandType(cards)
+	handType := DetermineHandType(cards, false)
 	stringifiedType := typeToString(handType)
 	if stringifiedType != "FiveOfAKind" {
 		t.Errorf("Expected FiveOfAKind, got %s", stringifiedType)
 	}
 
 	cards = stringToSliceOfCards("7777K")
-	handType = DetermineHandType(cards)
+	handType = DetermineHandType(cards, false)
 	stringifiedType = typeToString(handType)
 	if stringifiedType != "FourOfAKind" {
 		t.Errorf("Expected FourOfAKind, got %s", stringifiedType)
 	}
 
 	cards = stringToSliceOfCards("KKK77")
-	handType = DetermineHandType(cards)
+	handType = DetermineHandType(cards, false)
 	stringifiedType = typeToString(handType)
 	if stringifiedType != "FullHouse" {
 		t.Errorf("Expected FullHouse, got %s", stringifiedType)
 	}
 
 	cards = stringToSliceOfCards("KK777")
-	handType = DetermineHandType(cards)
+	handType = DetermineHandType(cards, false)
 	stringifiedType = typeToString(handType)
 	if stringifiedType != "FullHouse" {
 		t.Errorf("Expected FullHouse, got %s", stringifiedType)
 	}
 
 	cards = stringToSliceOfCards("T55J5")
-	handType = DetermineHandType(cards)
+	handType = DetermineHandType(cards, false)
 	stringifiedType = typeToString(handType)
 	if stringifiedType != "ThreeOfAKind" {
 		t.Errorf("Expected ThreeOfAKind, got %s", stringifiedType)
 	}
 
 	cards = stringToSliceOfCards("KK677")
-	handType = DetermineHandType(cards)
+	handType = DetermineHandType(cards, false)
 	stringifiedType = typeToString(handType)
 	if stringifiedType != "TwoPair" {
 		t.Errorf("Expected TwoPair, got %s", stringifiedType)
 	}
 
 	cards = stringToSliceOfCards("32T3K")
-	handType = DetermineHandType(cards)
+	handType = DetermineHandType(cards, false)
 	stringifiedType = typeToString(handType)
 	if stringifiedType != "OnePair" {
 		t.Errorf("Expected OnePair, got %s", stringifiedType)
 	}
 
 	cards = stringToSliceOfCards("A2345")
-	handType = DetermineHandType(cards)
+	handType = DetermineHandType(cards, false)
 	stringifiedType = typeToString(handType)
 	if stringifiedType != "HighCard" {
 		t.Errorf("Expected HighCard, got %s", stringifiedType)
