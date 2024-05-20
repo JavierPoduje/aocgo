@@ -43,7 +43,63 @@ func (s *SolverEight) SolveFirstProblem() int {
 }
 
 func (s *SolverEight) SolveSecondProblem() int {
-	return 0
+	s.instructions = buildInstructions(s.content[0])
+	nodesByName := buildNodes(s.content[1:])
+	nodesToTraverse := getStartNodes(nodesByName)
+
+	numberOfEndNodes := 0
+	currentEndNodes := make([]bool, len(nodesToTraverse))
+	instructionsIdx := 0
+	steps := 0
+
+	for numberOfEndNodes < len(nodesToTraverse) {
+		newNodesToTraverse := make([]string, len(nodesToTraverse))
+		for idx, nodeName := range nodesToTraverse {
+			if instructionsIdx == len(s.instructions) {
+				instructionsIdx = 0
+			}
+
+			instruction := s.instructions[instructionsIdx]
+
+			var newNodeName string
+			if instruction == "L" {
+				newNodeName = nodesByName[nodeName].Left.Name
+			} else if instruction == "R" {
+				newNodeName = nodesByName[nodeName].Right.Name
+			} else {
+				fmt.Println("Invalid instruction")
+				log.Fatal()
+			}
+
+			if nodesByName[newNodeName].IsEndNode() && !currentEndNodes[idx] {
+				currentEndNodes[idx] = true
+				numberOfEndNodes++
+			} else if !nodesByName[newNodeName].IsEndNode() && currentEndNodes[idx] {
+				numberOfEndNodes--
+				currentEndNodes[idx] = false
+			}
+
+			newNodesToTraverse[idx] = newNodeName
+		}
+
+		nodesToTraverse = newNodesToTraverse
+
+		steps++
+		instructionsIdx++
+	}
+
+	return steps
+
+}
+
+func getStartNodes(nodesByName map[string]*Node) []string {
+	startNodes := make([]string, 0)
+	for _, node := range nodesByName {
+		if node.IsStartNode() {
+			startNodes = append(startNodes, node.Name)
+		}
+	}
+	return startNodes
 }
 
 func (s *SolverEight) Parse(file string) {
@@ -88,6 +144,8 @@ func buildNodes(content []string) map[string]*Node {
 		right := parsedBranches[1]
 
 		nodesByName[nodeName] = NewNode(nodeName)
+		nodesByName[left] = NewNode(left)
+		nodesByName[right] = NewNode(right)
 		leftAndRightByNodeName[nodeName] = []string{left, right}
 	}
 
@@ -95,6 +153,15 @@ func buildNodes(content []string) map[string]*Node {
 		currNode := nodesByName[nodeName]
 		leftNode := nodesByName[leftAndRight[0]]
 		rightNode := nodesByName[leftAndRight[1]]
+
+		if leftNode == nil {
+			fmt.Printf("leftNode: %v\n", leftAndRight[0])
+			log.Fatalf("Node %s has no left node", nodeName)
+		} else if rightNode == nil {
+			fmt.Printf("rightNode: %v\n", leftAndRight[1])
+			log.Fatalf("Node %s has no right node", nodeName)
+		}
+
 		currNode.SetLeft(leftNode)
 		currNode.SetRight(rightNode)
 	}
@@ -122,4 +189,12 @@ func (n *Node) SetLeft(node *Node) {
 
 func (n *Node) SetRight(node *Node) {
 	n.Right = node
+}
+
+func (n *Node) IsStartNode() bool {
+	return n.Name[2] == 'A'
+}
+
+func (n *Node) IsEndNode() bool {
+	return n.Name[2] == 'Z'
 }
