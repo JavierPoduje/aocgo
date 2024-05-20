@@ -14,7 +14,7 @@ type FromToRange struct {
 	to   int
 }
 
-type Node struct {
+type SourceDestinationNode struct {
 	source      string
 	destination string
 	ranges      []FromToRange
@@ -23,7 +23,7 @@ type Node struct {
 type SolverFive struct {
 	content []string
 	seeds   []int
-	nodes   []Node
+	nodes   []SourceDestinationNode
 }
 
 func (s *SolverFive) Parse(file string) {
@@ -91,7 +91,7 @@ func (s *SolverFive) SolveSecondProblem() int {
 
 }
 
-func getLocationBySeed(seed int, nodes []Node) int {
+func getLocationBySeed(seed int, nodes []SourceDestinationNode) int {
 	sourcesDestinations := [][]string{
 		{"seed", "soil"},
 		{"soil", "fertilizer"},
@@ -138,12 +138,12 @@ func (f FromToRange) Get(valueToMapFrom int) (int, bool) {
 
 func (s *SolverFive) buildNodes() {
 	s.seeds = buildSeedsRow(s.content[0])
-	nodes := make([]Node, 0)
+	nodes := make([]SourceDestinationNode, 0)
 
 	for _, row := range s.content[1:] {
 		if isHeaderRow(row) {
 			source, destination := getSourceAndDestination(row)
-			nodes = append(nodes, Node{
+			nodes = append(nodes, SourceDestinationNode{
 				source:      source,
 				destination: destination,
 				ranges:      make([]FromToRange, 0),
@@ -220,8 +220,8 @@ func buildMapRow(row string) (int, int, int) {
 	return from, to, size
 }
 
-func getBySourceAndDestination(source string, destination string, nodes []Node) Node {
-	var ans Node
+func getBySourceAndDestination(source string, destination string, nodes []SourceDestinationNode) SourceDestinationNode {
+	var ans SourceDestinationNode
 	for _, node := range nodes {
 		if node.source == source && node.destination == destination {
 			ans = node
