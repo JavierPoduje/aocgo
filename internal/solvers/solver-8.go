@@ -8,31 +8,28 @@ import (
 )
 
 type SolverEight struct {
-	content      []string
-	instructions []string
+	content []string
+	cmds    []string
 }
 
 func (s *SolverEight) SolveFirstProblem() int {
-	s.instructions = buildInstructions(s.content[0])
+	s.cmds = buildCommands(s.content[0])
 	nodesByName := buildNodes(s.content[2:])
 
 	node := nodesByName["AAA"]
 	instructionsIdx := 0
 	steps := 0
 	for node.Name != "ZZZ" {
-		if instructionsIdx == len(s.instructions) {
+		if instructionsIdx == len(s.cmds) {
 			instructionsIdx = 0
 		}
 
-		instruction := s.instructions[instructionsIdx]
+		instruction := s.cmds[instructionsIdx]
 
 		if instruction == "L" {
-			node = node.Left
+			node = nodesByName[node.Left]
 		} else if instruction == "R" {
-			node = node.Right
-		} else {
-			fmt.Println("Invalid instruction")
-			log.Fatal()
+			node = nodesByName[node.Right]
 		}
 
 		steps++
@@ -43,56 +40,55 @@ func (s *SolverEight) SolveFirstProblem() int {
 }
 
 func (s *SolverEight) SolveSecondProblem() int {
-	s.instructions = buildInstructions(s.content[0])
+	s.cmds = buildCommands(s.content[0])
 	nodesByName := buildNodes(s.content[1:])
+
 	nodesToTraverse := getStartNodes(nodesByName)
 
-	numberOfEndNodes := 0
-	currentEndNodes := make([]bool, len(nodesToTraverse))
-	instructionsIdx := 0
-	steps := 0
+	stepsInBetweenZsPerNode := make([][]int, len(nodesToTraverse))
+	for nodeIdx, nodeName := range nodesToTraverse {
+		node := nodesByName[nodeName]
+		steps := 0
+		cmdIdx := 0
+		firstZNodeName := ""
+		stepsInBetweenZs := make([]int, 0)
 
-	for numberOfEndNodes < len(nodesToTraverse) {
-		newNodesToTraverse := make([]string, len(nodesToTraverse))
-		for idx, nodeName := range nodesToTraverse {
-			if instructionsIdx == len(s.instructions) {
-				instructionsIdx = 0
+		for {
+			if cmdIdx == len(s.cmds) {
+				cmdIdx = 0
 			}
 
-			instruction := s.instructions[instructionsIdx]
+			cmd := s.cmds[cmdIdx]
 
-			var newNodeName string
-			if instruction == "L" {
-				newNodeName = nodesByName[nodeName].Left.Name
-			} else if instruction == "R" {
-				newNodeName = nodesByName[nodeName].Right.Name
-			} else {
-				fmt.Println("Invalid instruction")
-				log.Fatal()
+			if cmd == "L" {
+				node = nodesByName[node.Left]
+			} else if cmd == "R" {
+				node = nodesByName[node.Right]
 			}
 
-			if nodesByName[newNodeName].IsEndNode() && !currentEndNodes[idx] {
-				currentEndNodes[idx] = true
-				numberOfEndNodes++
-			} else if !nodesByName[newNodeName].IsEndNode() && currentEndNodes[idx] {
-				numberOfEndNodes--
-				currentEndNodes[idx] = false
-			}
+			steps++
+			cmdIdx++
 
-			newNodesToTraverse[idx] = newNodeName
+			if node.IsEndNode() {
+				stepsInBetweenZs = append(stepsInBetweenZs, steps)
+				steps = 0
+				if firstZNodeName == "" {
+					firstZNodeName = node.Name
+				} else if node.Name == firstZNodeName {
+					break
+				}
+			}
 		}
 
-		nodesToTraverse = newNodesToTraverse
-
-		steps++
-		instructionsIdx++
+		stepsInBetweenZsPerNode[nodeIdx] = stepsInBetweenZs
 	}
 
-	return steps
+	fmt.Printf("stepsInBetweenZsPerNode: %v\n", stepsInBetweenZsPerNode)
 
+	return 0
 }
 
-func getStartNodes(nodesByName map[string]*Node) []string {
+func getStartNodes(nodesByName map[string]Node) []string {
 	startNodes := make([]string, 0)
 	for _, node := range nodesByName {
 		if node.IsStartNode() {
@@ -120,7 +116,7 @@ func (s *SolverEight) Parse(file string) {
 	s.content = rows
 }
 
-func buildInstructions(row string) []string {
+func buildCommands(row string) []string {
 	intructions := make([]string, 0)
 	for _, char := range row {
 		intructions = append(intructions, string(char))
@@ -128,11 +124,14 @@ func buildInstructions(row string) []string {
 	return intructions
 }
 
-func buildNodes(content []string) map[string]*Node {
-	nodesByName := make(map[string]*Node)
-	leftAndRightByNodeName := make(map[string][]string)
+func buildNodes(content []string) map[string]Node {
+	nodesByName := make(map[string]Node)
 
 	for _, row := range content {
+		if row == "" {
+			continue
+		}
+
 		splittedRow := strings.Split(row, " = ")
 		branches := strings.Replace(splittedRow[1], "(", "", -1)
 		branches = strings.Replace(branches, ")", "", -1)
@@ -143,27 +142,7 @@ func buildNodes(content []string) map[string]*Node {
 		left := parsedBranches[0]
 		right := parsedBranches[1]
 
-		nodesByName[nodeName] = NewNode(nodeName)
-		nodesByName[left] = NewNode(left)
-		nodesByName[right] = NewNode(right)
-		leftAndRightByNodeName[nodeName] = []string{left, right}
-	}
-
-	for nodeName, leftAndRight := range leftAndRightByNodeName {
-		currNode := nodesByName[nodeName]
-		leftNode := nodesByName[leftAndRight[0]]
-		rightNode := nodesByName[leftAndRight[1]]
-
-		if leftNode == nil {
-			fmt.Printf("leftNode: %v\n", leftAndRight[0])
-			log.Fatalf("Node %s has no left node", nodeName)
-		} else if rightNode == nil {
-			fmt.Printf("rightNode: %v\n", leftAndRight[1])
-			log.Fatalf("Node %s has no right node", nodeName)
-		}
-
-		currNode.SetLeft(leftNode)
-		currNode.SetRight(rightNode)
+		nodesByName[nodeName] = NewNode(nodeName, left, right)
 	}
 
 	return nodesByName
@@ -175,26 +154,34 @@ func buildNodes(content []string) map[string]*Node {
 
 type Node struct {
 	Name  string
-	Left  *Node
-	Right *Node
+	Left  string
+	Right string
 }
 
-func NewNode(name string) *Node {
-	return &Node{Name: name}
+func NewNode(name string, left string, right string) Node {
+	return Node{
+		Name:  name,
+		Left:  left,
+		Right: right,
+	}
 }
 
-func (n *Node) SetLeft(node *Node) {
-	n.Left = node
+func (n *Node) SetLeft(nodeName string) {
+	n.Left = nodeName
 }
 
-func (n *Node) SetRight(node *Node) {
-	n.Right = node
+func (n *Node) SetRight(nodeName string) {
+	n.Right = nodeName
 }
 
-func (n *Node) IsStartNode() bool {
+func (n Node) IsStartNode() bool {
 	return n.Name[2] == 'A'
 }
 
-func (n *Node) IsEndNode() bool {
+func (n Node) IsEndNode() bool {
 	return n.Name[2] == 'Z'
+}
+
+func (n Node) String() string {
+	return fmt.Sprintf("\tName: %s, Left: %s, Right: %s\n", n.Name, n.Left, n.Right)
 }
