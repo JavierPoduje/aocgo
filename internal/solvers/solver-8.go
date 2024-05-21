@@ -83,9 +83,29 @@ func (s *SolverEight) SolveSecondProblem() int {
 		stepsInBetweenZsPerNode[nodeIdx] = stepsInBetweenZs
 	}
 
-	fmt.Printf("stepsInBetweenZsPerNode: %v\n", stepsInBetweenZsPerNode)
+	// take the first value of each `stepsInBetweenZsPerNode`
+	nums := make([]int, len(stepsInBetweenZsPerNode))
+	for i, stepsInBetweenZs := range stepsInBetweenZsPerNode {
+		nums[i] = stepsInBetweenZs[0]
+	}
 
-	return 0
+	return lcm(nums)
+}
+
+func lcm(nums []int) int {
+	gcd := func(a, b int) int {
+		for b != 0 {
+			a, b = b, a%b
+		}
+		return a
+
+	}
+
+	lcm := nums[0]
+	for i := 1; i < len(nums); i++ {
+		lcm = lcm * nums[i] / gcd(lcm, nums[i])
+	}
+	return lcm
 }
 
 func getStartNodes(nodesByName map[string]Node) []string {
