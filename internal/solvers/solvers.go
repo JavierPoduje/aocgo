@@ -16,6 +16,7 @@ func GetSolverByNumber(solverNumber int) (solver types.Solver, filename string) 
 		fileSix   = "./internal/text-files/6.txt"
 		fileSeven = "./internal/text-files/7.txt"
 		fileEight = "./internal/text-files/8.txt"
+		fileNine = "./internal/text-files/9.txt"
 	)
 
 	switch solverNumber {
@@ -35,6 +36,8 @@ func GetSolverByNumber(solverNumber int) (solver types.Solver, filename string) 
 		return &SolverSeven{}, fileSeven
 	case 8:
 		return &SolverEight{}, fileEight
+	case 9:
+		return &SolverNine{}, fileNine
 	default:
 		log.Fatal("Invalid solver number")
 	}

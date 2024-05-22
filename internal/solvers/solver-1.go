@@ -43,13 +43,13 @@ func (s *SolverOne) SolveSecondProblem() int {
 	numberRows := make([]int, 0)
 
 	for _, row := range s.content {
-		numberRows = append(numberRows, processRow(row))
+		numberRows = append(numberRows, processCurrentRow(row))
 	}
 
 	return sumSliceOfNumbers(numberRows)
 }
 
-func processRow(row []string) int {
+func processCurrentRow(row []string) int {
 	leftNum := ""
 	rightNum := ""
 

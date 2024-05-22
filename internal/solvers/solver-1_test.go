@@ -36,43 +36,43 @@ func TestSolverOne_SolveSecondProblem(t *testing.T) {
 }
 
 func TestSolverOne_processRow(t *testing.T) {
-	rowNum := processRow([]string{"t", "w", "o", "1", "n", "i", "n", "e"})
+	rowNum := processCurrentRow([]string{"t", "w", "o", "1", "n", "i", "n", "e"})
 	if rowNum != 29 {
 		t.Errorf("Expected 29, got %d", rowNum)
 	}
-	rowNum = processRow([]string{"e", "i", "g", "h", "t", "w", "o", "t", "h", "r", "e", "e"})
+	rowNum = processCurrentRow([]string{"e", "i", "g", "h", "t", "w", "o", "t", "h", "r", "e", "e"})
 	if rowNum != 83 {
 		t.Errorf("Expected 83, got %d", rowNum)
 	}
-	rowNum = processRow([]string{"a", "b", "c", "o", "n", "e", "2", "t", "h", "r", "e", "e", "x", "y", "z"})
+	rowNum = processCurrentRow([]string{"a", "b", "c", "o", "n", "e", "2", "t", "h", "r", "e", "e", "x", "y", "z"})
 	if rowNum != 13 {
 		t.Errorf("Expected 13, got %d", rowNum)
 	}
-	rowNum = processRow([]string{"x", "t", "w", "o", "n", "e", "3", "f", "o", "u", "r"})
+	rowNum = processCurrentRow([]string{"x", "t", "w", "o", "n", "e", "3", "f", "o", "u", "r"})
 	if rowNum != 24 {
 		t.Errorf("Expected 24, got %d", rowNum)
 	}
-	rowNum = processRow([]string{"4", "n", "i", "n", "e", "e", "i", "g", "h", "t", "s", "e", "v", "e", "n", "2"})
+	rowNum = processCurrentRow([]string{"4", "n", "i", "n", "e", "e", "i", "g", "h", "t", "s", "e", "v", "e", "n", "2"})
 	if rowNum != 42 {
 		t.Errorf("Expected 42, got %d", rowNum)
 	}
-	rowNum = processRow([]string{"z", "o", "n", "e", "i", "g", "h", "t", "2", "3", "4"})
+	rowNum = processCurrentRow([]string{"z", "o", "n", "e", "i", "g", "h", "t", "2", "3", "4"})
 	if rowNum != 14 {
 		t.Errorf("Expected 14, got %d", rowNum)
 	}
-	rowNum = processRow([]string{"7", "p", "q", "r", "s", "t", "s", "i", "x", "t", "e", "e", "n"})
+	rowNum = processCurrentRow([]string{"7", "p", "q", "r", "s", "t", "s", "i", "x", "t", "e", "e", "n"})
 	if rowNum != 76 {
 		t.Errorf("Expected 76, got %d", rowNum)
 	}
-	rowNum = processRow([]string{"j", "j", "n", "1", "d", "r", "d", "f", "f", "h", "s"})
+	rowNum = processCurrentRow([]string{"j", "j", "n", "1", "d", "r", "d", "f", "f", "h", "s"})
 	if rowNum != 11 {
 		t.Errorf("Expected 11, got %d", rowNum)
 	}
-	rowNum = processRow([]string{"f", "v", "q", "z", "l", "c", "p", "5"})
+	rowNum = processCurrentRow([]string{"f", "v", "q", "z", "l", "c", "p", "5"})
 	if rowNum != 55 {
 		t.Errorf("Expected 55, got %d", rowNum)
 	}
-	rowNum = processRow([]string{"5"})
+	rowNum = processCurrentRow([]string{"5"})
 	if rowNum != 55 {
 		t.Errorf("Expected 55, got %d", rowNum)
 	}
