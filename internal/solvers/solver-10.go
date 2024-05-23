@@ -25,15 +25,73 @@ const (
 func (s *SolverTen) SolveFirstProblem() int {
 	rowIdx, colIdx := startingPoint(s.grid)
 	head, tail := s.findHeadAndTail(rowIdx, colIdx)
-	return s.findFarthestDistance(head, tail, []int{rowIdx, colIdx})
+	farthestDistance, _ := s.traverseAndFindFarthestDistance(head, tail, []int{rowIdx, colIdx})
+	return farthestDistance
 }
 
-func (s *SolverTen) findFarthestDistance(head, tail, start []int) int {
+func (s *SolverTen) SolveSecondProblem() int {
+	rowIdx, colIdx := startingPoint(s.grid)
+	head, tail := s.findHeadAndTail(rowIdx, colIdx)
+	_, visited := s.traverseAndFindFarthestDistance(head, tail, []int{rowIdx, colIdx})
+	tiles := s.countInnerTiles(visited)
+	return tiles
+}
+
+func (s *SolverTen) countInnerTiles(visited map[string]bool) int {
+	tiles := 0
+	for rowIdx, row := range s.grid {
+		for colIdx := range row {
+			key := idxKey(rowIdx, colIdx)
+			if visited[key] {
+				continue
+			}
+
+			rowInversions := s.countRowInversions(rowIdx, colIdx, visited)
+			if rowInversions%2 == 1 {
+				tiles++
+			}
+		}
+	}
+	return tiles
+}
+
+func (s *SolverTen) countRowInversions(rowIdx, colIdx int, visited map[string]bool) int {
+	if visited[idxKey(rowIdx, colIdx)] {
+		return 0
+	}
+
+	inversions := 0
+
+	for colIdx >= 0 {
+		if !visited[idxKey(rowIdx, colIdx)] {
+			colIdx--
+			continue
+		}
+
+		cell := s.grid[rowIdx][colIdx]
+
+		if cell == NorthWestBend || cell == NorthEastBend || cell == VerticalPipe {
+			inversions++
+		}
+
+		colIdx--
+	}
+
+	return inversions
+}
+
+func (s *SolverTen) traverseAndFindFarthestDistance(head, tail, start []int) (int, map[string]bool) {
 	prevHead := start
 	prevTail := start
 
 	headCount := 1
 	tailCount := 1
+
+	visited := map[string]bool{
+		idxKey(start[0], start[1]): true,
+		idxKey(head[0], head[1]):   true,
+		idxKey(tail[0], tail[1]):   true,
+	}
 
 	for {
 		if head[0] == tail[0] && head[1] == tail[1] {
@@ -43,6 +101,7 @@ func (s *SolverTen) findFarthestDistance(head, tail, start []int) int {
 		// move head
 		head, prevHead = s.getNextCoord(head, prevHead)
 		headCount++
+		visited[idxKey(head[0], head[1])] = true
 
 		if head[0] == tail[0] && head[1] == tail[1] {
 			break
@@ -51,13 +110,14 @@ func (s *SolverTen) findFarthestDistance(head, tail, start []int) int {
 		// move tail
 		tail, prevTail = s.getNextCoord(tail, prevTail)
 		tailCount++
+		visited[idxKey(tail[0], tail[1])] = true
 
 		if head[0] == tail[0] && head[1] == tail[1] {
 			break
 		}
 	}
 
-	return int(math.Max(float64(headCount), float64(tailCount)))
+	return int(math.Max(float64(headCount), float64(tailCount))), visited
 }
 
 func (s *SolverTen) getNextCoord(coord, prev []int) ([]int, []int) {
@@ -186,10 +246,6 @@ func startingPoint(content [][]rune) (int, int) {
 
 	log.Fatal("Starting point not found")
 	return -1, -1
-}
-
-func (s *SolverTen) SolveSecondProblem() int {
-	return 0
 }
 
 func (s *SolverTen) Parse(file string) {
