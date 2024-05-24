@@ -224,10 +224,10 @@ func (s *SolverTen) isValidMove(curr []int, next []int) bool {
 
 func directions() [][]int {
 	return [][]int{
-		{-1, 0}, // north
-		{0, 1},  // east
-		{1, 0},  // south
-		{0, -1}, // west
+		{-1, 0}, // north - up
+		{0, 1},  // east - right
+		{1, 0},  // south - down
+		{0, -1}, // west - left
 	}
 }
 

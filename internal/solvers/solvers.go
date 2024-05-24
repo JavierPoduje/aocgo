@@ -8,16 +8,17 @@ import (
 
 func GetSolverByNumber(solverNumber int) (solver types.Solver, filename string) {
 	const (
-		fileOne   = "./internal/text-files/1.txt"
-		fileTwo   = "./internal/text-files/2.txt"
-		fileThree = "./internal/text-files/3.txt"
-		fileFour  = "./internal/text-files/4.txt"
-		fileFive  = "./internal/text-files/5.txt"
-		fileSix   = "./internal/text-files/6.txt"
-		fileSeven = "./internal/text-files/7.txt"
-		fileEight = "./internal/text-files/8.txt"
-		fileNine  = "./internal/text-files/9.txt"
-		fileTen   = "./internal/text-files/10.txt"
+		fileOne    = "./internal/text-files/1.txt"
+		fileTwo    = "./internal/text-files/2.txt"
+		fileThree  = "./internal/text-files/3.txt"
+		fileFour   = "./internal/text-files/4.txt"
+		fileFive   = "./internal/text-files/5.txt"
+		fileSix    = "./internal/text-files/6.txt"
+		fileSeven  = "./internal/text-files/7.txt"
+		fileEight  = "./internal/text-files/8.txt"
+		fileNine   = "./internal/text-files/9.txt"
+		fileTen    = "./internal/text-files/10.txt"
+		fileEleven = "./internal/text-files/11.txt"
 	)
 
 	switch solverNumber {
@@ -41,6 +42,8 @@ func GetSolverByNumber(solverNumber int) (solver types.Solver, filename string) 
 		return &SolverNine{}, fileNine
 	case 10:
 		return &SolverTen{}, fileTen
+	case 11:
+		return &SolverEleven{}, fileEleven
 	default:
 		log.Fatal("Invalid solver number")
 	}
